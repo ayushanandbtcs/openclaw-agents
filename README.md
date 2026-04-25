@@ -11,17 +11,33 @@ Real agent definitions powering the automation workflow.
                                   │
                                   ▼
                     ┌─────────────────────────────────┐
-                    │        PLANNER AGENT            │
-                    │   Decomposes task into steps    │
+                    │      HS-MAESTRO                 │
+                    │   Orchestrates entire workflow  │
+                    │   Dispatches to agents          │
                     └─────────────┬───────────────────┘
                                   │
                     ┌─────────────┴─────────────┐
                     │                           │
                     ▼                           ▼
         ┌─────────────────────┐   ┌─────────────────────┐
-        │   CODER AGENT       │   │   REVIEWER AGENT    │
-        │   Implements code   │◄──│   Validates quality │
+        │   PLANNER AGENT     │   │   MYCROFT AGENT     │
+        │   Creates plan      │   │   Researches/       │
+        │   Decomposes tasks  │   │   Investigates      │
         └──────────┬──────────┘   └─────────────────────┘
+                   │
+                   ▼
+        ┌─────────────────────┐
+        │   CODER AGENT       │
+        │   Implements code   │
+        │   Writes tests      │
+        └──────────┬──────────┘
+                   │
+                   ▼
+        ┌─────────────────────┐
+        │   REVIEWER AGENT    │
+        │   Checks quality    │
+        │   Finds issues      │
+        └──────────┬──────────┘
                    │
                    ▼
         ┌─────────────────────┐
@@ -31,24 +47,38 @@ Real agent definitions powering the automation workflow.
         │   convinced         │
         └──────────┬──────────┘
                    │ (approved)
-                   ▼
-        ┌─────────────────────┐
-        │   MYCROFT AGENT     │
-        │   Investigates/     │
-        │   Researches        │
-        └──────────┬──────────┘
                    │
                    ▼
         ┌─────────────────────┐
-        │   HS-MAESTRO        │
-        │   Orchestrates all  │
-        │   agents & workflow │
+        │   BACK TO MAESTRO   │
+        │   Create PR         │
         └─────────────────────┘
 ```
 
 ## The Agents
 
-### 1. Planner Agent
+### 1. HS-Maestro Agent (Orchestrator) ⭐ FIRST
+**Purpose:** Coordinates the entire workflow - receives request and dispatches to other agents
+
+**Responsibilities:**
+- Receives user requests
+- Decides which agents to invoke
+- Manages workflow state
+- Handles handoffs between agents
+- Creates final output (PRs, etc.)
+
+**Files:**
+- [AGENTS.md](agents/hs-maestro/agent/AGENTS.md) - Guidelines and rules
+- [SOUL.md](agents/hs-maestro/agent/SOUL.md) - Core identity and principles
+- [IDENTITY.md](agents/hs-maestro/agent/IDENTITY.md) - Role definition
+- [TOOLS.md](agents/hs-maestro/agent/TOOLS.md) - Tool capabilities
+- [BOOTSTRAP.md](agents/hs-maestro/agent/BOOTSTRAP.md) - Initialization
+- [HEARTBEAT.md](agents/hs-maestro/agent/HEARTBEAT.md) - Periodic tasks
+- [USER.md](agents/hs-maestro/agent/USER.md) - User context
+
+---
+
+### 2. Planner Agent
 **Purpose:** Breaks complex tasks into executable steps
 
 **Workflow:**
@@ -62,7 +92,21 @@ Real agent definitions powering the automation workflow.
 
 ---
 
-### 2. Coder Agent  
+### 3. Mycroft Agent
+**Purpose:** Researches, investigates, analyzes - runs in parallel with planning
+
+**Responsibilities:**
+- Codebase exploration
+- Bug investigation
+- Pattern recognition
+- Solution comparison
+- Documentation search
+
+**See:** [agents/mycroft/SOUL.md](agents/mycroft/SOUL.md)
+
+---
+
+### 4. Coder Agent  
 **Purpose:** Generates and modifies code
 
 **Workflow:**
@@ -77,7 +121,7 @@ Real agent definitions powering the automation workflow.
 
 ---
 
-### 3. Reviewer Agent
+### 5. Reviewer Agent
 **Purpose:** Validates code quality and catches issues
 
 **Checks:**
@@ -90,21 +134,7 @@ Real agent definitions powering the automation workflow.
 
 ---
 
-### 4. Mycroft Agent
-**Purpose:** Researches, investigates, analyzes
-
-**Responsibilities:**
-- Codebase exploration
-- Bug investigation
-- Pattern recognition
-- Solution comparison
-- Documentation search
-
-**See:** [agents/mycroft/SOUL.md](agents/mycroft/SOUL.md)
-
----
-
-### 5. Critic Agent
+### 6. Critic Agent
 **Purpose:** Gatekeeper who blocks workflow until convinced work is correct
 
 **Philosophy:** Trust but verify - other agents must prove correctness
@@ -125,20 +155,6 @@ Real agent definitions powering the automation workflow.
 
 ---
 
-### 6. HS-Maestro Agent (Orchestrator)
-**Purpose:** Coordinates the entire workflow
-
-**Files:**
-- [AGENTS.md](agents/hs-maestro/agent/AGENTS.md) - Guidelines and rules
-- [SOUL.md](agents/hs-maestro/agent/SOUL.md) - Core identity and principles
-- [IDENTITY.md](agents/hs-maestro/agent/IDENTITY.md) - Role definition
-- [TOOLS.md](agents/hs-maestro/agent/TOOLS.md) - Tool capabilities
-- [BOOTSTRAP.md](agents/hs-maestro/agent/BOOTSTRAP.md) - Initialization
-- [HEARTBEAT.md](agents/hs-maestro/agent/HEARTBEAT.md) - Periodic tasks
-- [USER.md](agents/hs-maestro/agent/USER.md) - User context
-
----
-
 ## Example Workflow
 
 ### PR Creation Flow
@@ -148,15 +164,26 @@ User: "Add JWT authentication"
     │
     ▼
 ┌─────────────────────────────────────┐
-│ 1. PLANNER analyzes request         │
-│    Creates:                         │
-│    - Task 1: Design auth schema     │
-│    - Task 2: Implement middleware   │
-│    - Task 3: Add login endpoint     │
-│    - Task 4: Write tests            │
+│ 0. MAESTRO receives request         │
+│    - Decides which agents to invoke │
+│    - Starts workflow                │
 └─────────────────────────────────────┘
     │
-    ▼
+    ├─────────────────────────────────┐
+    │                                 │
+    ▼                                 ▼
+┌──────────────────────┐  ┌──────────────────────────┐
+│ 1a. PLANNER          │  │ 1b. MYCROFT (parallel)   │
+│    Creates plan:     │  │    Searches codebase:    │
+│    - Auth schema     │  │    - Existing patterns   │
+│    - Middleware      │  │    - Similar features    │
+│    - Login endpoint  │  │    - Best practices      │
+│    - Tests           │  │                          │
+└──────────┬───────────┘  └────────────┬─────────────┘
+           │                           │
+           └───────────┬───────────────┘
+                       │
+                       ▼
 ┌─────────────────────────────────────┐
 │ 2. CODER implements each task       │
 │    - Generates code                 │
@@ -185,14 +212,7 @@ User: "Add JWT authentication"
     │
     ▼
 ┌─────────────────────────────────────┐
-│ 5. MYCROFT investigates if needed   │
-│    - Searches similar patterns      │
-│    - Validates approach             │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ 6. HS-MAESTRO orchestrates PR       │
+│ 5. BACK TO MAESTRO                  │
 │    - Creates branch                 │
 │    - Commits changes                │
 │    - Opens Pull Request             │
