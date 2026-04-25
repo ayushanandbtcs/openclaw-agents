@@ -1,65 +1,216 @@
-# OpenClaw Agent Configurations
+# OpenClaw Multi-Agent System
 
-Real agent definition files from OpenClaw automation system.
+Real agent definitions powering the automation workflow.
 
-## What's Included
+## Multi-Agent Architecture
 
-This repository contains the markdown documentation and configuration files that define how each agent behaves. **No API keys or sensitive data included.**
-
-### Agents
-
-#### 1. hs-maestro (Orchestrator)
-The main coordinator agent that manages workflow execution.
-- `AGENTS.md` - Agent guidelines and red lines
-- `SOUL.md` - Core personality and principles  
-- `IDENTITY.md` - Role definition
-- `TOOLS.md` - Available tools and capabilities
-- `BOOTSTRAP.md` - Initialization instructions
-- `HEARTBEAT.md` - Periodic task definitions
-- `USER.md` - User preferences and context
-
-#### 2. coder
-Specialized for code generation and modification.
-
-#### 3. planner  
-Decomposes complex tasks into executable steps.
-
-#### 4. reviewer
-Performs code quality analysis and review.
-
-#### 5. mycroft
-Intelligence and analysis agent.
-
-## Agent Structure
-
-Each agent contains:
 ```
-agent/
-├── AGENTS.md      # Guidelines and rules
-├── SOUL.md        # Core identity and principles
-├── IDENTITY.md    # Role definition
-├── TOOLS.md       # Tool definitions
-├── BOOTSTRAP.md   # Startup instructions
-├── HEARTBEAT.md   # Background tasks
-└── USER.md        # User context
+                    ┌─────────────────────────────────┐
+                    │         USER REQUEST            │
+                    └─────────────┬───────────────────┘
+                                  │
+                                  ▼
+                    ┌─────────────────────────────────┐
+                    │        PLANNER AGENT            │
+                    │   Decomposes task into steps    │
+                    └─────────────┬───────────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+        ┌─────────────────────┐   ┌─────────────────────┐
+        │   CODER AGENT       │   │   REVIEWER AGENT    │
+        │   Implements code   │◄──│   Validates quality │
+        └──────────┬──────────┘   └─────────────────────┘
+                   │
+                   ▼
+        ┌─────────────────────┐
+        │   MYCROFT AGENT     │
+        │   Investigates/     │
+        │   Researches        │
+        └──────────┬──────────┘
+                   │
+                   ▼
+        ┌─────────────────────┐
+        │   HS-MAESTRO        │
+        │   Orchestrates all  │
+        │   agents & workflow │
+        └─────────────────────┘
 ```
 
-## Security Note
+## The Agents
 
-- ❌ API keys (stored separately in auth-profiles.json)
-- ❌ Session logs (private to deployment)
-- ❌ Model configurations (contain endpoints)
-- ✅ Only documentation and behavior definitions
+### 1. Planner Agent
+**Purpose:** Breaks complex tasks into executable steps
 
-These files define **what** agents do, not **how** they authenticate.
+**Workflow:**
+1. Understand requirements
+2. Decompose into atomic tasks
+3. Map dependencies
+4. Assign to appropriate agents
+5. Validate feasibility
 
-## Usage
+**See:** [agents/planner/SOUL.md](agents/planner/SOUL.md)
 
-These configurations power OpenClaw's multi-agent automation system, allowing specialized agents to:
+---
 
-1. **Plan** - Break down complex tasks
-2. **Code** - Generate and modify code  
-3. **Review** - Analyze quality
-4. **Orchestrate** - Coordinate workflow
+### 2. Coder Agent  
+**Purpose:** Generates and modifies code
 
-See individual agent directories for their specific capabilities and behaviors.
+**Workflow:**
+1. Analyze requirements from plan
+2. Design solution
+3. Implement incrementally
+4. Write tests
+5. Document APIs
+6. Submit for review
+
+**See:** [agents/coder/SOUL.md](agents/coder/SOUL.md)
+
+---
+
+### 3. Reviewer Agent
+**Purpose:** Validates code quality and catches issues
+
+**Checks:**
+- Code quality (naming, structure, duplication)
+- Security (secrets, injection, XSS)
+- Architecture (SOLID, dependencies)
+- Testing (coverage, edge cases)
+
+**See:** [agents/reviewer/SOUL.md](agents/reviewer/SOUL.md)
+
+---
+
+### 4. Mycroft Agent
+**Purpose:** Researches, investigates, analyzes
+
+**Responsibilities:**
+- Codebase exploration
+- Bug investigation
+- Pattern recognition
+- Solution comparison
+- Documentation search
+
+**See:** [agents/mycroft/SOUL.md](agents/mycroft/SOUL.md)
+
+---
+
+### 5. HS-Maestro Agent (Orchestrator)
+**Purpose:** Coordinates the entire workflow
+
+**Files:**
+- [AGENTS.md](agents/hs-maestro/agent/AGENTS.md) - Guidelines and rules
+- [SOUL.md](agents/hs-maestro/agent/SOUL.md) - Core identity and principles
+- [IDENTITY.md](agents/hs-maestro/agent/IDENTITY.md) - Role definition
+- [TOOLS.md](agents/hs-maestro/agent/TOOLS.md) - Tool capabilities
+- [BOOTSTRAP.md](agents/hs-maestro/agent/BOOTSTRAP.md) - Initialization
+- [HEARTBEAT.md](agents/hs-maestro/agent/HEARTBEAT.md) - Periodic tasks
+- [USER.md](agents/hs-maestro/agent/USER.md) - User context
+
+---
+
+## Example Workflow
+
+### PR Creation Flow
+
+```
+User: "Add JWT authentication"
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ 1. PLANNER analyzes request         │
+│    Creates:                         │
+│    - Task 1: Design auth schema     │
+│    - Task 2: Implement middleware   │
+│    - Task 3: Add login endpoint     │
+│    - Task 4: Write tests            │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ 2. CODER implements each task       │
+│    - Generates code                 │
+│    - Writes tests                   │
+│    - Adds documentation             │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ 3. REVIEWER validates code          │
+│    - Scans for security issues      │
+│    - Checks code quality            │
+│    - Verifies test coverage         │
+│    Score: 8.5/10                    │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ 4. MYCROFT investigates if needed   │
+│    - Searches similar patterns      │
+│    - Validates approach             │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ 5. HS-MAESTRO orchestrates PR       │
+│    - Creates branch                 │
+│    - Commits changes                │
+│    - Opens Pull Request             │
+│    - Assigns reviewers              │
+└─────────────────────────────────────┘
+    │
+    ▼
+GitHub: PR #456 created successfully!
+```
+
+---
+
+## Directory Structure
+
+```
+agents/
+├── coder/
+│   └── SOUL.md          # Code generation principles
+├── planner/
+│   └── SOUL.md          # Task decomposition rules
+├── reviewer/
+│   └── SOUL.md          # Code review checklist
+├── mycroft/
+│   └── SOUL.md          # Investigation methodology
+└── hs-maestro/
+    └── agent/
+        ├── AGENTS.md    # Guidelines
+        ├── SOUL.md      # Core identity
+        ├── IDENTITY.md  # Role definition
+        ├── TOOLS.md     # Tools available
+        ├── BOOTSTRAP.md # Startup logic
+        ├── HEARTBEAT.md # Background tasks
+        └── USER.md      # User preferences
+```
+
+---
+
+## Security Notice
+
+This repository contains **only** agent behavior definitions:
+- ✅ Markdown documentation
+- ✅ Agent personalities and workflows
+- ✅ Checklists and guidelines
+
+**Excluded for security:**
+- ❌ JSON configs (contain API keys)
+- ❌ Session logs (private)
+- ❌ Model endpoints
+- ❌ Authentication credentials
+
+---
+
+## How OpenClaw Uses These
+
+1. **At startup**, OpenClaw loads these SOUL.md files to understand each agent's purpose
+2. **During execution**, agents reference their guidelines to determine how to act
+3. **HS-Maestro** coordinates handoffs between agents based on the workflow
+4. **All agents** communicate through OpenCode sessions to interact with repositories
+
+The agents work together to automate the entire development lifecycle from planning to deployment.
