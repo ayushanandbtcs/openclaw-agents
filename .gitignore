@@ -1,0 +1,19 @@
+# Ignore all sensitive files
+*.json
+auth*
+credentials*
+*.key
+*.pem
+.env
+
+# Session data
+sessions/
+*.session
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
