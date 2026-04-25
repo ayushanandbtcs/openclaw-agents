@@ -25,6 +25,14 @@ Real agent definitions powering the automation workflow.
                    │
                    ▼
         ┌─────────────────────┐
+        │   CRITIC AGENT      │◄── "Prove it to me"
+        │   Gatekeeper        │    "Show me evidence"
+        │   Blocks until      │    "Why not alternative?"
+        │   convinced         │
+        └──────────┬──────────┘
+                   │ (approved)
+                   ▼
+        ┌─────────────────────┐
         │   MYCROFT AGENT     │
         │   Investigates/     │
         │   Researches        │
@@ -96,7 +104,28 @@ Real agent definitions powering the automation workflow.
 
 ---
 
-### 5. HS-Maestro Agent (Orchestrator)
+### 5. Critic Agent
+**Purpose:** Gatekeeper who blocks workflow until convinced work is correct
+
+**Philosophy:** Trust but verify - other agents must prove correctness
+
+**Process:**
+1. Challenges all submissions
+2. Demands evidence and proof
+3. Questions assumptions
+4. Requires edge case handling
+5. Only approves when convinced
+
+**Power:**
+- Can reject any agent's work
+- Sends back for revision
+- Escalates to Maestro if disagreements
+
+**See:** [agents/critic/SOUL.md](agents/critic/SOUL.md)
+
+---
+
+### 6. HS-Maestro Agent (Orchestrator)
 **Purpose:** Coordinates the entire workflow
 
 **Files:**
@@ -146,14 +175,24 @@ User: "Add JWT authentication"
     │
     ▼
 ┌─────────────────────────────────────┐
-│ 4. MYCROFT investigates if needed   │
+│ 4. CRITIC challenges everything     │
+│    Critic: "Prove this is secure"   │
+│    Coder: "bcrypt + rate limiting"  │
+│    Critic: "Show me the tests"      │
+│    [Coder shows evidence]           │
+│    Critic: "Approved with caution"  │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│ 5. MYCROFT investigates if needed   │
 │    - Searches similar patterns      │
 │    - Validates approach             │
 └─────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────┐
-│ 5. HS-MAESTRO orchestrates PR       │
+│ 6. HS-MAESTRO orchestrates PR       │
 │    - Creates branch                 │
 │    - Commits changes                │
 │    - Opens Pull Request             │
@@ -176,6 +215,8 @@ agents/
 │   └── SOUL.md          # Task decomposition rules
 ├── reviewer/
 │   └── SOUL.md          # Code review checklist
+├── critic/
+│   └── SOUL.md          # Gatekeeper that blocks until convinced
 ├── mycroft/
 │   └── SOUL.md          # Investigation methodology
 └── hs-maestro/
